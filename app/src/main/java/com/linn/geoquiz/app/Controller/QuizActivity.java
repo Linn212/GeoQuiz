@@ -23,7 +23,9 @@ public class QuizActivity extends ActionBarActivity {
     private Button mFalseButton;
     private Button mNextButton;
     private Button mPrevButton;
+    private Button mCheatButton;
     private TextView mQuestionTextView;
+
 
     private TrueFalse[] mQuestionBank = new TrueFalse[]{
         new TrueFalse(R.string.question_africa, false),
@@ -97,6 +99,14 @@ public class QuizActivity extends ActionBarActivity {
                 mCurrentIndex=(mCurrentIndex+1) % mQuestionBank.length;
                 Log.d(TAG, "mCurrnetIndex is " + mCurrentIndex);
                 updateQuestion();
+            }
+        });
+
+        mCheatButton = (Button)findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                //Start CheatActivity
             }
         });
 
