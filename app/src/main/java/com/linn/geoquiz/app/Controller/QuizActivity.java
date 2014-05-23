@@ -1,4 +1,4 @@
-package com.linn.geoquiz.app;
+package com.linn.geoquiz.app.Controller;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -6,12 +6,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.linn.geoquiz.app.R;
 
 
 public class QuizActivity extends ActionBarActivity {
 
     private Button mTrueButton;
     private Button mFalseButton;
+    private Button mNextButton;
+    private TextView mQuestionTextView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,12 +28,18 @@ public class QuizActivity extends ActionBarActivity {
         mTrueButton = (Button) findViewById(R.id.true_button);
         mTrueButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                
+            public void onClick(View v) {
+                Toast.makeText(QuizActivity.this, R.string.correct_toast, Toast.LENGTH_SHORT).show();
             }
         });
 
         mFalseButton = (Button) findViewById(R.id.false_button);
+        mFalseButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(QuizActivity.this, R.string.incorrect_toast, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 
