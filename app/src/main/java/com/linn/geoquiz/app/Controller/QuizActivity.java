@@ -1,5 +1,6 @@
 package com.linn.geoquiz.app.Controller;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,7 +18,9 @@ import com.linn.geoquiz.app.R;
 public class QuizActivity extends ActionBarActivity {
 
     private static final String TAG = "QuizActivity";
-    private static final String KEY_INDEX = "index";
+    private static final String KEY_INDEX = "Index";
+    private static final String KEY_CHEATER = "IsCheater";
+    private static final String KEY_CHEATLIST = "CheatList";
 
     private Button mTrueButton;
     private Button mFalseButton;
@@ -25,7 +28,6 @@ public class QuizActivity extends ActionBarActivity {
     private Button mPrevButton;
     private Button mCheatButton;
     private TextView mQuestionTextView;
-
 
     private TrueFalse[] mQuestionBank = new TrueFalse[]{
         new TrueFalse(R.string.question_africa, false),
@@ -35,10 +37,24 @@ public class QuizActivity extends ActionBarActivity {
         new TrueFalse(R.string.question_oceans, true),
     };
 
+    private boolean[] mHasCheatedList = new boolean[mQuestionBank.length];
+
     private int mCurrentIndex = 0;
+    private boolean mIsCheater;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        Log.d(TAG, "onActivityResult");
+        if (data ==null){
+            return;
+        }
+        mIsCheater = data.getBooleanExtra(CheatActivity.EXTRA_ANSWER_SHOWN, false);
+        mHasCheatedList[mCurrentIndex] = mIsCheater;
+
+    }
 
     private void updateQuestion(){
-        Log.d(TAG, "Updating question text for question #"+ mCurrentIndex, new Exception());
+        Log.d(TAG, "Updating question text for question #"+ mCurrentIndex);
         int question = mQuestionBank[mCurrentIndex].getmQuestion();
         mQuestionTextView.setText(question);
     }
@@ -47,14 +63,26 @@ public class QuizActivity extends ActionBarActivity {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].ismTrueQuestion();
         int messageResId=0;
 
-        if (userPressedTrue == answerIsTrue){
-            messageResId = R.string.correct_toast;
-        }else{
-            messageResId = R.string.incorrect_toast;
+        Log.d(TAG, "mIsCheater is " + mIsCheater);
+
+
+
+        if (mHasCheatedList[mCurrentIndex]){
+            messageResId = R.string.judgment_toast;
+
+        }else {
+
+            if (userPressedTrue == answerIsTrue) {
+                messageResId = R.string.correct_toast;
+            } else {
+                messageResId = R.string.incorrect_toast;
+            }
         }
 
         Toast.makeText(this, messageResId,Toast.LENGTH_SHORT).show();
     }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +126,7 @@ public class QuizActivity extends ActionBarActivity {
             public void onClick(View v){
                 mCurrentIndex=(mCurrentIndex+1) % mQuestionBank.length;
                 Log.d(TAG, "mCurrnetIndex is " + mCurrentIndex);
+                mIsCheater = false;
                 updateQuestion();
             }
         });
@@ -106,48 +135,76 @@ public class QuizActivity extends ActionBarActivity {
         mCheatButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                //Start CheatActivity
+                Intent i = new Intent (QuizActivity.this, CheatActivity.class);
+
+                boolean answerIsTure = mQuestionBank[mCurrentIndex].ismTrueQuestion();
+                i.putExtra(CheatActivity.EXTRA_ANSWER_IS_TRUE, answerIsTure);
+
+                startActivityForResult(i, 0);
             }
         });
 
         if (savedInstanceState != null){
+            Log.d(TAG, "savedInstanceState: " + savedInstanceState.toString());
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+            //mIsCheater = savedInstanceState.getBoolean(KEY_CHEATER, false);
+            mHasCheatedList = savedInstanceState.getBooleanArray(KEY_CHEATLIST);
+            mIsCheater = mHasCheatedList[mCurrentIndex];
+            for (boolean value : mHasCheatedList) {
+                Log.d(TAG, "LIST:" + value);
+            }
+
+        } else {
+            Log.d(TAG, "savedInstanceState was NULL");
         }
         updateQuestion();
     }
+
+
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState){
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG, "onSaveInstanceState");
+
+
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+        savedInstanceState.putBoolean(KEY_CHEATER, mIsCheater);
+
+        savedInstanceState.putBooleanArray(KEY_CHEATLIST, mHasCheatedList);
+        Log.d(TAG, "savedInstanceState: " + savedInstanceState.toString());
+
+        for (boolean value : mHasCheatedList) {
+            Log.d(TAG, "LIST:" + value);
+        }
+
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        Log.d(TAG, "onStart() called");
+        Log.d(TAG, "QuizActivity onStart() called");
     }
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause() called");
+        Log.d(TAG, "QuizActivity onPause() called");
     }
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume() called");
+        Log.d(TAG, "QuizActivity onResume() called");
     }
     @Override
     public void onStop() {
         super.onStop();
-        Log.d(TAG, "onStop() called");
+        Log.d(TAG, "QuizActivity onStop() called");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy() called");
+        Log.d(TAG, "QuizActivity onDestroy() called");
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
